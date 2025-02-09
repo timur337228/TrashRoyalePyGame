@@ -522,8 +522,8 @@ class MainTower(Tower):
 
 
 def game_loop():
-    global all_sprites, pers, enemy, player_units, enemy_units, card_cell_player, card_cell_enemy
-    card_cell_player, card_cell_enemy = None, None
+    global all_sprites, pers, enemy, player_units, enemy_units, card_cell
+    card_cell = None
     p = 0
     elixir1 = Elixir()
     elixir2 = Elixir()
@@ -582,18 +582,17 @@ def game_loop():
             for card in cards_player:
                 if card.is_clicked(event):
                     pers_player = card.card_type
-                    card_cell_player = card
+                    card_cell = card
                     p = 1
                     y = False
                     break
             for card in cards_enemy:
                 if card.is_clicked(event):
                     pers_enemy = card.card_type
-                    card_cell_enemy = card
+                    card_cell = card
                     p = 2
                     y = False
                     break
-            print(card_cell_enemy, card_cell_player)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -601,7 +600,7 @@ def game_loop():
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 mouse_x, mouse_y = snap_to_grid(mouse_x, mouse_y)
 
-                if card_cell_player is not None:
+                if card_cell is not None:
                     if p == 1 and mouse_y >= 540:  # Игрок может ставить только на своей половине
                         if elixir1.can_afford(CARD_TYPES[pers_player]["elixir_cost"]):
                             elixir1.amount -= CARD_TYPES[pers_player]["elixir_cost"]
@@ -609,9 +608,9 @@ def game_loop():
                                 unit = Unit(mouse_x + 10 * i, mouse_y, pers_player, is_enemy=False)
                                 player_units.add(unit)
                                 all_sprites.add(unit)
-                            cards_player = update_deck(cards_player, card_cell_player)
-                            card_cell_enemy = None
-                if card_cell_enemy is not None:
+                            cards_player = update_deck(cards_player, card_cell)
+                            card_cell = None
+                if card_cell is not None:
                     if p == 2 and mouse_y < 540:  # Враг может ставить только на своей половине
                         if elixir2.can_afford(CARD_TYPES[pers_enemy]["elixir_cost"]):
                             elixir2.amount -= CARD_TYPES[pers_enemy]["elixir_cost"]
@@ -619,8 +618,8 @@ def game_loop():
                                 unit = Unit(mouse_x + 10 * i, mouse_y, pers_enemy, is_enemy=True)
                                 enemy_units.add(unit)
                                 all_sprites.add(unit)
-                            cards_enemy = update_deck(cards_enemy, card_cell_enemy)
-                            card_cell_player = None
+                            cards_enemy = update_deck(cards_enemy, card_cell)
+                            card_cell = None
 
         all_towers = player_towers.sprites() + enemy_towers.sprites()
         all_units = player_units.sprites() + enemy_units.sprites()
